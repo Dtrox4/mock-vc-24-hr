@@ -53,6 +53,31 @@ def join_voice_channel():
             return jsonify({'error': 'Invalid channel ID or not a voice channel.'}), 400
     return jsonify({'error': 'Channel ID is required.'}), 400
 
+@client.command()
+async def react(ctx, message_id: int, emoji: str):
+    """React to a message with a specified emoji."""
+    try:
+        # Fetch the message using the message ID
+        message = await ctx.channel.fetch_message(message_id)
+        
+        # Add the reaction
+        await message.add_reaction(emoji)
+        await ctx.send(f"Reacted to message ID {message_id} with {emoji}!")
+    except discord.NotFound:
+        await ctx.send("Message not found. Please check the message ID.")
+    except discord.HTTPException:
+        await ctx.send("Failed to add reaction. Please check the emoji or try again.")
+    except Exception as e:
+        await ctx.send(f"An error occurred: {str(e)}")
+
+# Make sure to add this command to your bot's command processing
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return  # Ignore messages from bots
+
+    await bot.process_commands(message)
+
 # Run the bot in a separate thread
 def run_bot():
     bot.run(TOKEN)
