@@ -37,6 +37,13 @@ async def joinvc(ctx, channel_id: int):
 
 # Create a Flask app
 app = Flask(__name__)
+# Run the bot in a separate thread
+def run_bot():
+    bot.run(TOKEN)
+
+if __name__ == '__main__':
+    threading.Thread(target=run_bot).start()
+    app.run(port=5000)
 
 @app.route('/joinvc', methods=['POST'])
 def join_voice_channel():
@@ -77,11 +84,3 @@ async def on_message(message):
         return  # Ignore messages from bots
 
     await bot.process_commands(message)
-
-# Run the bot in a separate thread
-def run_bot():
-    bot.run(TOKEN)
-
-if __name__ == '__main__':
-    threading.Thread(target=run_bot).start()
-    app.run(port=5000)
