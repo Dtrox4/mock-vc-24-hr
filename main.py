@@ -53,7 +53,7 @@ def join_voice_channel():
             return jsonify({'error': 'Invalid channel ID or not a voice channel.'}), 400
     return jsonify({'error': 'Channel ID is required.'}), 400
 
-@client.command()
+@bot.command()
 async def react(ctx, message_id: int, emoji: str):
     """React to a message with a specified emoji."""
     try:
@@ -71,7 +71,7 @@ async def react(ctx, message_id: int, emoji: str):
         await ctx.send(f"An error occurred: {str(e)}")
 
 # Make sure to add this command to your bot's command processing
-@client.event
+@bot.event
 async def on_message(message):
     if message.author.bot:
         return  # Ignore messages from bots
