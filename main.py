@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify
+import asyncio
+import threading
 
 # Load environment variables from .env file
 load_dotenv()
