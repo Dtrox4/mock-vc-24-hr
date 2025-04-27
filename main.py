@@ -18,7 +18,7 @@ intents.message_content = True  # Enable the message content intent
 intents.voice_states = True      # Enable voice state intents
 
 # Create a bot instance with command prefix '!' and the specified intents
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='.', intents=intents)
 
 @bot.event
 async def on_ready():
