@@ -49,7 +49,7 @@ async def joinvc(ctx, channel_id: int):
     else:
         await ctx.send('Invalid channel ID or not a voice channel.')
 
-
+@app.route('/joinvc', methods=['POST'])
 def join_voice_channel():
     data = request.json
     channel_id = data.get('channel_id')
