@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
-import threading
+from threading import Thread
 
 # Load environment variables from .env file
 load_dotenv()
