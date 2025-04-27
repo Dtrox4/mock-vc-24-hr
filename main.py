@@ -65,6 +65,15 @@ def join_voice_channel():
     return jsonify({'error': 'Channel ID is required.'}), 400
 
 @bot.command()
+async def leavevc(ctx):
+    """Leave the voice channel."""
+    if ctx.voice_client:  # Check if the bot is connected to a voice channel
+        await ctx.voice_client.disconnect()
+        await ctx.send("Disconnected from the voice channel.")
+    else:
+        await ctx.send("I am not in a voice channel!")
+
+@bot.command()
 async def react(ctx, message_id: int, emoji: str):
     """React to a message with a specified emoji."""
     try:
