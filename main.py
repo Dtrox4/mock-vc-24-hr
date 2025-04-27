@@ -20,6 +20,20 @@ intents.voice_states = True      # Enable voice state intents
 # Create a bot instance with command prefix '!' and the specified intents
 bot = commands.Bot(command_prefix='.', intents=intents)
 
+app = Flask(__name__)
+@app.route('/')
+def home():
+    return "I'm alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+keep_alive()
+
 @bot.event
 async def on_ready():
     print(f'Bot is online as {bot.user}!')
@@ -75,13 +89,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-def run_bot():
-    bot.run(TOKEN)
+bot.run(TOKEN)
 
-# Create a Flask app
-app = Flask(__name__)
-# Run the bot in a separate thread
-if __name__ == '__main__':
-    threading.Thread(target=run_bot).start()
-    app.run(port=8080)
 
