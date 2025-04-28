@@ -73,30 +73,32 @@ async def on_reaction_remove(reaction, user):
             )
             embed.set_footer(text=f"Message ID: {reaction.message.id}")
 
-            # Send the embed to authorized users in DMs
-            for user_id in AUTHORIZED_USERS:
-                try:
-                    user_to_notify = await bot.fetch_user(user_id)
-                    await user_to_notify.send(embed=embed)
-                except discord.Forbidden:
-                    print(f"Could not send DM to user ID: {user_id}")
-                except discord.HTTPException as e:
-                    print(f"Failed to send DM to user ID: {user_id}. Error: {e}")
-                    
-@app.route('/joinvc', methods=['POST'])
-def join_voice_channel():
-    data = request.json
-    channel_id = data.get('channel_id')
+            # Specify the channel ID where you want to send the embed
+            channel_id = 1365929942235222017  # Replace with your actual channel ID
 
-    if channel_id:
-        # Get the channel by ID
-        channel = bot.get_channel(channel_id)
-        if channel and isinstance(channel, discord.VoiceChannel):
-            asyncio.create_task(channel.connect())
-            return jsonify({'message': f'Bot joined {channel.name}!'}), 200
-        else:
-            return jsonify({'error': 'Invalid channel ID or not a voice channel.'}), 400
-    return jsonify({'error': 'Channel ID is required.'}), 400
+            # Fetch the channel
+            channel = bot.get_channel(channel_id)
+            if channel is not None:
+                try:
+                    await channel.send(embed=embed)
+                except discord.Forbidden:
+                    print(f"Could not send message to channel ID: {channel_id}")
+                except discord.HTTPException as e:
+                    print(f"Failed to send message to channel ID: {channel_id}. Error: {e}")
+            else:
+                print(f"Channel ID {channel_id} not found.")
+                    
+
+ @bot.command()
+ async def joinvc(ctx, channel_id: int):
+     # Get the channel by ID
+     channel = bot.get_channel(channel_id)
+     if channel and isinstance(channel, discord.VoiceChannel):
+         # Join the voice channel
+         await channel.connect()
+         await ctx.send(f'Joined {channel.name}!')
+     else:
+         await ctx.send('Invalid channel ID or not a voice channel.')
 
 @app.route('/joinvc', methods=['POST'])
 def join_voice_channel():
