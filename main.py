@@ -89,16 +89,16 @@ async def on_reaction_remove(reaction, user):
                 print(f"Channel ID {channel_id} not found.")
                     
 
- @bot.command()
- async def joinvc(ctx, channel_id: int):
-     # Get the channel by ID
-     channel = bot.get_channel(channel_id)
-     if channel and isinstance(channel, discord.VoiceChannel):
-         # Join the voice channel
-         await channel.connect()
-         await ctx.send(f'Joined {channel.name}!')
-     else:
-         await ctx.send('Invalid channel ID or not a voice channel.')
+@bot.command()
+async def joinvc(ctx, channel_id: int):
+    # Get the channel by ID
+    channel = bot.get_channel(channel_id)
+    if channel and isinstance(channel, discord.VoiceChannel):
+        # Join the voice channel
+        await channel.connect()
+        await ctx.send(f'Joined {channel.name}!')
+    else:
+        await ctx.send('Invalid channel ID or not a voice channel.')
 
 @app.route('/joinvc', methods=['POST'])
 def join_voice_channel():
