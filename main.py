@@ -20,7 +20,7 @@ AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 13050
 
 # Define the intents
 intents = discord.Intents.default()
-intents.reactions = True
+intents.message.reactions = True
 intents.messages = True
 intents.message_content = True  # Enable the message content intent
 intents.guilds = True
