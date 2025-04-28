@@ -12,13 +12,22 @@ load_dotenv()
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+# Replace with your Discord User ID
+YOUR_USER_ID = 1212229549459374222
+
+# Authorized users
+AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 1305007578857869403, 1147059630846005318}
+
 # Define the intents
 intents = discord.Intents.default()
 intents.message_content = True  # Enable the message content intent
 intents.voice_states = True      # Enable voice state intents
+intents.voice_states = True
+intents.dm_messages = True
 
 # Create a bot instance with command prefix '!' and the specified intents
 bot = commands.Bot(command_prefix='.', intents=intents)
+message_id_to_listen = None
 
 app = Flask(__name__)
 @app.route('/')
@@ -37,6 +46,40 @@ keep_alive()
 @bot.event
 async def on_ready():
     print(f'Bot is online as {bot.user}!')
+
+@bot.command()
+async def listenreactions(ctx, message_id: int):
+    global message_id_to_listen
+    message_id_to_listen = message_id
+    await ctx.send(f'Now listening for reactions on message ID: {message_id}')
+
+@bot.event
+async def on_reaction_remove(reaction, user):
+    # Check if the user is a bot
+    if user.bot:
+        return
+
+    # Check if the reaction is on the specified message
+    if reaction.message.id == message_id_to_listen:
+        # Check if there are any remaining reactions
+        if reaction.count == 0:
+            # Create an embed to report the action
+            embed = discord.Embed(
+                title="All Reactions Cleared",
+                description=f"All reactions have been cleared from the message by {user.mention}.",
+                color=discord.Color.red()
+            )
+            embed.set_footer(text=f"Message ID: {reaction.message.id}")
+
+            # Send the embed to authorized users in DMs
+            for user_id in AUTHORIZED_USERS:
+                try:
+                    user_to_notify = await bot.fetch_user(user_id)
+                    await user_to_notify.send(embed=embed)
+                except discord.Forbidden:
+                    print(f"Could not send DM to user ID: {user_id}")
+                except discord.HTTPException as e:
+                    print(f"Failed to send DM to user ID: {user_id}. Error: {e}")
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
