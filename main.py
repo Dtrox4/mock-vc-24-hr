@@ -83,16 +83,20 @@ async def on_reaction_remove(reaction, user):
                 except discord.HTTPException as e:
                     print(f"Failed to send DM to user ID: {user_id}. Error: {e}")
                     
-@bot.command()
-async def joinvc(ctx, channel_id: int):
-    # Get the channel by ID
-    channel = bot.get_channel(channel_id)
-    if channel and isinstance(channel, discord.VoiceChannel):
-        # Join the voice channel
-        await channel.connect()
-        await ctx.send(f'Joined {channel.name}!')
-    else:
-        await ctx.send('Invalid channel ID or not a voice channel.')
+@app.route('/joinvc', methods=['POST'])
+def join_voice_channel():
+    data = request.json
+    channel_id = data.get('channel_id')
+
+    if channel_id:
+        # Get the channel by ID
+        channel = bot.get_channel(channel_id)
+        if channel and isinstance(channel, discord.VoiceChannel):
+            asyncio.create_task(channel.connect())
+            return jsonify({'message': f'Bot joined {channel.name}!'}), 200
+        else:
+            return jsonify({'error': 'Invalid channel ID or not a voice channel.'}), 400
+    return jsonify({'error': 'Channel ID is required.'}), 400
 
 @app.route('/joinvc', methods=['POST'])
 def join_voice_channel():
