@@ -41,47 +41,39 @@ keep_alive()
 async def on_ready():
     print(f'Bot is online as {bot.user}!')
 
+message_id_to_listen = None
+
 @bot.command()
 async def listenreactions(ctx, message_id: int):
     global message_id_to_listen
     message_id_to_listen = message_id
-    await ctx.send(f'Now listening for reactions on message ID: {message_id}')
+    await ctx.send(f'✅ Now listening for reactions on message ID: {message_id}')
 
 @bot.event
 async def on_reaction_remove(reaction, user):
-    print(f"Reaction removed by {user} on message {reaction.message.id}")
-
     if user.bot:
         return
 
-    if reaction.message.id == message_id_to_listen:
-        try:
-            message = await reaction.message.channel.fetch_message(reaction.message.id)
-        except Exception as e:
-            print(f"Failed to fetch message: {e}")
-            return
+    if reaction.message.id != message_id_to_listen:
+        return
 
-        all_empty = all(r.count <= 1 for r in message.reactions)
+    try:
+        message = await reaction.message.channel.fetch_message(reaction.message.id)
+    except Exception as e:
+        print(f"Failed to fetch message: {e}")
+        return
 
-        print(f"All empty: {all_empty}")  # Debug print
+    total_reactions = sum(r.count for r in message.reactions)
+    print(f"Total reactions left: {total_reactions}")
 
-        if all_empty:
-            embed = discord.Embed(
-                title="All Reactions Cleared",
-                description=f"All reactions have been cleared from the message by {user.mention}.",
-                color=discord.Color.red()
-            )
-            embed.set_footer(text=f"Message ID: {reaction.message.id}")
-
-            channel_id = 1365929942235222017
-            channel = bot.get_channel(channel_id)
-            print(f"Fetched channel: {channel}")  # Debug print
-            if channel:
-                try:
-                    await channel.send(embed=embed)
-                    print(f"Sent embed to {channel.name}")
-                except Exception as e:
-                    print(f"Failed to send embed: {e}")
+    if total_reactions == 0:
+        embed = discord.Embed(
+            title="🚨 All Reactions Cleared!",
+            description=f"**{user.mention}** has cleared all reactions from [this message]({message.jump_url}).",
+            color=discord.Color.red()
+        )
+        embed.set_footer(text=f"Message ID: {message.id}")
+        await message.channel.send(embed=embed)
                     
 
 @bot.command()
