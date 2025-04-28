@@ -20,11 +20,10 @@ AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 13050
 
 # Define the intents
 intents = discord.Intents.default()
-intents.message.reactions = True
+intents = discord.Intents.default()
+intents.reactions = True
 intents.messages = True
-intents.message_content = True  # Enable the message content intent
-intents.guilds = True
-intents.dm_messages = True
+intents.message_content = True
 intents.voice_states = True      # Enable voice state intents
 
 # Create a bot instance with command prefix '!' and the specified intents
@@ -58,15 +57,26 @@ async def listenreactions(ctx, message_id: int):
 
 @bot.event
 async def on_reaction_remove(reaction, user):
-    # Check if the user is a bot
+    # Ignore bot reactions
     if user.bot:
         return
 
-    # Check if the reaction is on the specified message
+    # Only react if it's the right message
     if reaction.message.id == message_id_to_listen:
-        # Check if there are any remaining reactions on the message
-        if not reaction.message.reactions:  # If there are no reactions left
-            # Create an embed to report the action
+        # Fetch the full updated message
+        try:
+            message = await reaction.message.channel.fetch_message(reaction.message.id)
+        except discord.NotFound:
+            print(f"Message {reaction.message.id} not found.")
+            return
+        except discord.HTTPException as e:
+            print(f"HTTP Error fetching message: {e}")
+            return
+
+        # Check if all reactions are empty (only bot or none left)
+        all_empty = all(r.count <= 1 for r in message.reactions)
+
+        if all_empty:
             embed = discord.Embed(
                 title="All Reactions Cleared",
                 description=f"All reactions have been cleared from the message by {user.mention}.",
@@ -74,20 +84,16 @@ async def on_reaction_remove(reaction, user):
             )
             embed.set_footer(text=f"Message ID: {reaction.message.id}")
 
-            # Specify the channel ID where you want to send the embed
-            channel_id = 1365929942235222017  # Replace with your actual channel ID
-
-            # Fetch the channel
+            channel_id = 1365929942235222017  # Your target channel ID
             channel = bot.get_channel(channel_id)
-            if channel is not None:
+            if channel:
                 try:
                     await channel.send(embed=embed)
                 except discord.Forbidden:
-                    print(f"Could not send message to channel ID: {channel_id}")
+                    print(f"Cannot send message to channel ID: {channel_id}")
                 except discord.HTTPException as e:
-                    print(f"Failed to send message to channel ID: {channel_id}. Error: {e}")
-            else:
-                print(f"Channel ID {channel_id} not found.")
+                    print(f"HTTP error sending to channel ID: {channel_id} — {e}")
+
                     
 
 @bot.command()
