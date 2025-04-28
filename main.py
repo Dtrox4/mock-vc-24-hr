@@ -61,8 +61,8 @@ async def on_reaction_remove(reaction, user):
 
     # Check if the reaction is on the specified message
     if reaction.message.id == message_id_to_listen:
-        # Check if there are any remaining reactions
-        if reaction.count == 0:
+        # Check if there are any remaining reactions on the message
+        if not reaction.message.reactions:  # If there are no reactions left
             # Create an embed to report the action
             embed = discord.Embed(
                 title="All Reactions Cleared",
@@ -80,7 +80,7 @@ async def on_reaction_remove(reaction, user):
                     print(f"Could not send DM to user ID: {user_id}")
                 except discord.HTTPException as e:
                     print(f"Failed to send DM to user ID: {user_id}. Error: {e}")
-
+                    
 @bot.command()
 async def joinvc(ctx, channel_id: int):
     # Get the channel by ID
