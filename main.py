@@ -57,24 +57,21 @@ async def listenreactions(ctx, message_id: int):
 
 @bot.event
 async def on_reaction_remove(reaction, user):
-    # Ignore bot reactions
+    print(f"Reaction removed by {user} on message {reaction.message.id}")
+
     if user.bot:
         return
 
-    # Only react if it's the right message
     if reaction.message.id == message_id_to_listen:
-        # Fetch the full updated message
         try:
             message = await reaction.message.channel.fetch_message(reaction.message.id)
-        except discord.NotFound:
-            print(f"Message {reaction.message.id} not found.")
-            return
-        except discord.HTTPException as e:
-            print(f"HTTP Error fetching message: {e}")
+        except Exception as e:
+            print(f"Failed to fetch message: {e}")
             return
 
-        # Check if all reactions are empty (only bot or none left)
         all_empty = all(r.count <= 1 for r in message.reactions)
+
+        print(f"All empty: {all_empty}")  # Debug print
 
         if all_empty:
             embed = discord.Embed(
@@ -84,16 +81,15 @@ async def on_reaction_remove(reaction, user):
             )
             embed.set_footer(text=f"Message ID: {reaction.message.id}")
 
-            channel_id = 1365929942235222017  # Your target channel ID
+            channel_id = 1365929942235222017
             channel = bot.get_channel(channel_id)
+            print(f"Fetched channel: {channel}")  # Debug print
             if channel:
                 try:
                     await channel.send(embed=embed)
-                except discord.Forbidden:
-                    print(f"Cannot send message to channel ID: {channel_id}")
-                except discord.HTTPException as e:
-                    print(f"HTTP error sending to channel ID: {channel_id} — {e}")
-
+                    print(f"Sent embed to {channel.name}")
+                except Exception as e:
+                    print(f"Failed to send embed: {e}"
                     
 
 @bot.command()
