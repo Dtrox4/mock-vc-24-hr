@@ -89,7 +89,7 @@ async def on_reaction_remove(reaction, user):
                     await channel.send(embed=embed)
                     print(f"Sent embed to {channel.name}")
                 except Exception as e:
-                    print(f"Failed to send embed: {e}"
+                    print(f"Failed to send embed: {e}")
                     
 
 @bot.command()
