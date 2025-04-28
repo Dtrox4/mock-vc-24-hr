@@ -25,7 +25,6 @@ intents.message_content = True  # Enable the message content intent
 intents.guilds = True
 intents.dm_messages = True
 intents.voice_states = True      # Enable voice state intents
-intents.message_reactions = True  # This should work if you have the correct version
 
 # Create a bot instance with command prefix '!' and the specified intents
 bot = commands.Bot(command_prefix='.', intents=intents)
