@@ -11,15 +11,7 @@ load_dotenv()
 
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
-
-# Replace with your Discord User ID
-YOUR_USER_ID = 1212229549459374222
-
-# Authorized users
-AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 1305007578857869403, 1147059630846005318}
-
 # Define the intents
-intents = discord.Intents.default()
 intents = discord.Intents.default()
 intents.reactions = True
 intents.messages = True
