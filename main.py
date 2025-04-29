@@ -23,6 +23,7 @@ AUTHORIZED_USERS = {
 user_skull_list = set()
 
 # Define the intents
+intents=discord.Intents.all()
 intents.reactions = True
 intents.messages = True
 intents.message_content = True
