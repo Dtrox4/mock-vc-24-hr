@@ -5,12 +5,31 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
+import asyncio
+import os
+import sys
+import platform
+import random
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
+
+# Replace with your Discord User ID
+YOUR_USER_ID = 1212229549459374222
+
+# Authorized users
+AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 1305007578857869403, 1147059630846005318}
+
+# Define channels and optional messages
+WELCOME_CHANNELS = {
+    1359328373356363987: None,
+    1360104912939257978: None,
+    1359319883988336924: "welc! rep **/mock** 4 pic, bst for roles!"  # Add a custom message here
+}
+
 # Define the intents
 intents = discord.Intents.default()
 intents.reactions = True
@@ -38,43 +57,27 @@ def keep_alive():
 keep_alive()
 
 @bot.event
-async def on_ready():
-    print(f'Bot is online as {bot.user}!')
-
-message_id_to_listen = None
-
-@bot.command()
-async def listenreactions(ctx, message_id: int):
-    global message_id_to_listen
-    message_id_to_listen = message_id
-    await ctx.send(f'✅ Now listening for reactions on message ID: {message_id}')
+async def on_member_join(member):
+    for channel_id, custom_message in WELCOME_CHANNELS.items():
+        channel = member.guild.get_channel(channel_id)
+        if channel:
+            if custom_message:
+                content = f"{member.mention} {custom_message}"
+            else:
+                content = f"{member.mention}"
+            await channel.send(content, delete_after=30)
 
 @bot.event
-async def on_reaction_remove(reaction, user):
-    if user.bot:
-        return
+async def on_ready():
+    print(f"Logged in as {bot.user}")
+    await bot.change_presence(activity=discord.Activity(
+        type=discord.ActivityType.streaming,
+        name=".gg/mock active giveaways!",
+        url="https://twitch.tv/your_channel"
+    ))
 
-    if reaction.message.id != message_id_to_listen:
-        return
-
-    try:
-        message = await reaction.message.channel.fetch_message(reaction.message.id)
-    except Exception as e:
-        print(f"Failed to fetch message: {e}")
-        return
-
-    total_reactions = sum(r.count for r in message.reactions)
-    print(f"Total reactions left: {total_reactions}")
-
-    if total_reactions == 0:
-        embed = discord.Embed(
-            title="🚨 All Reactions Cleared!",
-            description=f"**{user.mention}** has cleared all reactions from [this message]({message.jump_url}).",
-            color=discord.Color.red()
-        )
-        embed.set_footer(text=f"Message ID: {message.id}")
-        await message.channel.send(embed=embed)
-                    
+async def main():
+    await bot.load_extension("skull_handler")
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
