@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
-import skull_handler
 
 # Load environment variables from .env file
 load_dotenv()
@@ -13,11 +12,15 @@ load_dotenv()
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-# Replace with your Discord User ID
-YOUR_USER_ID = 1212229549459374222
+AUTHORIZED_USERS = {
+    1212229549459374222,
+    845578292778238002,
+    1177672910102614127,
+    1305007578857869403,
+    1147059630846005318
+}
 
-# Authorized users
-AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 1305007578857869403}
+user_skull_list = set()
 
 # Define the intents
 intents = discord.Intents.all()
@@ -105,6 +108,120 @@ async def react(ctx, message_id: int, emoji: str):
         await ctx.send("Failed to add reaction. Please check the emoji or try again.")
     except Exception as e:
         await ctx.send(f"An error occurred: {str(e)}")
+@bot.group(invoke_without_command=True)
+async def skull(ctx, *, user: discord.User = None):
+    if ctx.author.id not in AUTHORIZED_USERS:
+        embed = discord.Embed(
+            description="🚫 You do not have permission to use this command.",
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
+        return
+
+    if user:
+        user_skull_list.add(user.id)
+        embed = discord.Embed(
+            description=f"💀 Skulling {user.mention} starting now.",
+            color=discord.Color.red()
+        )
+    else:
+        embed = discord.Embed(
+            title="Skull Help",
+            description="Use `.skull help` or subcommands like `list`, `stop`, `authorize`, etc.",
+            color=discord.Color.red()
+        )
+    await ctx.send(embed=embed)
+
+
+@skull.command()
+async def list(ctx):
+    users = [f"<@{uid}>" for uid in user_skull_list]
+    embed = discord.Embed(
+        title="☠️ Skull List",
+        description="\n".join(users) if users else "⚠️ No users being skulled.",
+        color=discord.Color.green()
+    )
+    await ctx.send(embed=embed)
+
+
+@skull.command()
+async def stop(ctx, user: discord.User):
+    if user.id in user_skull_list:
+        user_skull_list.remove(user.id)
+        embed = discord.Embed(
+            description=f"✅ {user.mention} will no longer be skulled.",
+            color=discord.Color.green()
+        )
+    else:
+        embed = discord.Embed(
+            description=f"‼️ {user.mention} is not currently being skulled.",
+            color=discord.Color.red()
+        )
+    await ctx.send(embed=embed)
+
+
+@skull.command()
+async def authorize(ctx, user: discord.User):
+    if ctx.author.id not in AUTHORIZED_USERS:
+        return await ctx.send("🚫 You are not allowed to use this command.")
+    
+    if user.id not in AUTHORIZED_USERS:
+        AUTHORIZED_USERS.add(user.id)
+        embed = discord.Embed(
+            description=f"✅ {user.mention} has been authorized.",
+            color=discord.Color.green()
+        )
+    else:
+        embed = discord.Embed(
+            description=f"‼️ {user.mention} is already authorized.",
+            color=discord.Color.red()
+        )
+    await ctx.send(embed=embed)
+
+
+@skull.command()
+async def unauthorize(ctx, user: discord.User):
+    if ctx.author.id not in AUTHORIZED_USERS:
+        return await ctx.send("🚫 You are not allowed to use this command.")
+    
+    if user.id == ctx.author.id:
+        embed = discord.Embed(
+            description="❌ You cannot unauthorize yourself.",
+            color=discord.Color.red()
+        )
+    elif user.id in AUTHORIZED_USERS:
+        AUTHORIZED_USERS.remove(user.id)
+        embed = discord.Embed(
+            description=f"✅ {user.mention} has been unauthorized.",
+            color=discord.Color.green()
+        )
+    else:
+        embed = discord.Embed(
+            description=f"‼️ {user.mention} is not in the authorized list.",
+            color=discord.Color.red()
+        )
+    await ctx.send(embed=embed)
+
+
+@skull.command()
+async def authorized(ctx):
+    users = [f"<@{uid}>" for uid in AUTHORIZED_USERS]
+    embed = discord.Embed(
+        title="✅ Authorized Users",
+        description="\n".join(users) if users else "⚠️ No users authorized.",
+        color=discord.Color.blue()
+    )
+    await ctx.send(embed=embed)
+    
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    if message.author.id in user_skull_list:
+        await message.channel.send(f"💀 {message.author.mention} has been skull'd again.")
+
+    await bot.process_commands(message)
 
 # Make sure to add this command to your bot's command processing
 @bot.event
@@ -114,12 +231,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-
-async def main():
-    await bot.load_extension("skull_handler")
-    await bot.run(TOKEN)
-
-
-asyncio.run(main())
+bot.run(TOKEN)
 
 
