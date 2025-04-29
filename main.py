@@ -54,10 +54,6 @@ async def on_ready():
         url="https://twitch.tv/your_channel"
     ))
 
-async def main():
-    await bot.load_extension("skull_handler")
-    await bot.start("YOUR_TOKEN")
-
 @bot.command()
 async def joinvc(ctx, channel_id: int):
     # Get the channel by ID
@@ -118,6 +114,12 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-bot.run(TOKEN)
+
+async def main():
+    await bot.load_extension("skull_handler")
+    await bot.run(TOKEN)
+
+
+asyncio.run(main())
 
 
