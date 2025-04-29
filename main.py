@@ -219,17 +219,16 @@ async def on_message(message):
         return
 
     if message.author.id in user_skull_list:
-        await message.channel.send(f"💀 {message.author.mention} has been skull'd again.")
+        try:
+            await message.add_reaction("☠️")
+        except discord.Forbidden:
+            print(f"Missing permissions to react in {message.channel.name}")
+        except discord.HTTPException as e:
+            print(f"Failed to add reaction: {e}")
 
     await bot.process_commands(message)
 
-# Make sure to add this command to your bot's command processing
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return  # Ignore messages from bots
 
-    await bot.process_commands(message)
 
 bot.run(TOKEN)
 
