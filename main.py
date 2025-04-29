@@ -24,7 +24,7 @@ YOUR_USER_ID = 1212229549459374222
 AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 1305007578857869403, 1147059630846005318}
 
 # Define the intents
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.reactions = True
 intents.messages = True
 intents.message_content = True
