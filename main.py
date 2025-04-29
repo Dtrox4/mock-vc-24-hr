@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
+import skull_handler
 
 # Load environment variables from .env file
 load_dotenv()
