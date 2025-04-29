@@ -60,6 +60,7 @@ async def on_ready():
 
 async def main():
     await bot.load_extension("skull_handler")
+    await bot.start("YOUR_TOKEN")
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
