@@ -4,10 +4,15 @@ from discord.ext import commands
 # Replace with your Discord User ID
 YOUR_USER_ID = 1212229549459374222
 
-# Authorized users
-AUTHORIZED_USERS = {YOUR_USER_ID, 845578292778238002, 1177672910102614127, 1305007578857869403, 1147059630846005318}
+# Authorized users set (DO NOT overwrite later)
+AUTHORIZED_USERS = {
+    YOUR_USER_ID,
+    845578292778238002,
+    1177672910102614127,
+    1305007578857869403,
+    1147059630846005318
+}
 
-AUTHORIZED_USERS = set()
 user_skull_list = set()
 
 class SkullHandler(commands.Cog):
