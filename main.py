@@ -23,7 +23,6 @@ AUTHORIZED_USERS = {
 user_skull_list = set()
 
 # Define the intents
-intents = discord.Intents.all()
 intents.reactions = True
 intents.messages = True
 intents.message_content = True
@@ -108,6 +107,7 @@ async def react(ctx, message_id: int, emoji: str):
         await ctx.send("Failed to add reaction. Please check the emoji or try again.")
     except Exception as e:
         await ctx.send(f"An error occurred: {str(e)}")
+
 @bot.group(invoke_without_command=True)
 async def skull(ctx, *, user: discord.User = None):
     if ctx.author.id not in AUTHORIZED_USERS:
@@ -126,8 +126,8 @@ async def skull(ctx, *, user: discord.User = None):
         )
     else:
         embed = discord.Embed(
-            title="Skull Help",
-            description="Use `.skull help` or subcommands like `list`, `stop`, `authorize`, etc.",
+            title="Help",
+            description="Use `.help` or subcommands like `list`, `stop`, `authorize`, etc.",
             color=discord.Color.red()
         )
     await ctx.send(embed=embed)
@@ -155,49 +155,6 @@ async def stop(ctx, user: discord.User):
     else:
         embed = discord.Embed(
             description=f"‼️ {user.mention} is not currently being skulled.",
-            color=discord.Color.red()
-        )
-    await ctx.send(embed=embed)
-
-
-@skull.command()
-async def authorize(ctx, user: discord.User):
-    if ctx.author.id not in AUTHORIZED_USERS:
-        return await ctx.send("🚫 You are not allowed to use this command.")
-    
-    if user.id not in AUTHORIZED_USERS:
-        AUTHORIZED_USERS.add(user.id)
-        embed = discord.Embed(
-            description=f"✅ {user.mention} has been authorized.",
-            color=discord.Color.green()
-        )
-    else:
-        embed = discord.Embed(
-            description=f"‼️ {user.mention} is already authorized.",
-            color=discord.Color.red()
-        )
-    await ctx.send(embed=embed)
-
-
-@skull.command()
-async def unauthorize(ctx, user: discord.User):
-    if ctx.author.id not in AUTHORIZED_USERS:
-        return await ctx.send("🚫 You are not allowed to use this command.")
-    
-    if user.id == ctx.author.id:
-        embed = discord.Embed(
-            description="❌ You cannot unauthorize yourself.",
-            color=discord.Color.red()
-        )
-    elif user.id in AUTHORIZED_USERS:
-        AUTHORIZED_USERS.remove(user.id)
-        embed = discord.Embed(
-            description=f"✅ {user.mention} has been unauthorized.",
-            color=discord.Color.green()
-        )
-    else:
-        embed = discord.Embed(
-            description=f"‼️ {user.mention} is not in the authorized list.",
             color=discord.Color.red()
         )
     await ctx.send(embed=embed)
