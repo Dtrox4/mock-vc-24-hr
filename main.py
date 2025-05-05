@@ -20,6 +20,14 @@ AUTHORIZED_USERS = {
     1147059630846005318
 }
 
+# Define channels and optional messages
+WELCOME_CHANNELS = {
+    1359328373356363987: None,
+    1360104912939257978: None,
+    1366327489122668644: None,
+    1359319883988336924: "welc! rep **/mock** 4 pic, bst for roles!"  # Add a custom message here
+}
+
 user_skull_list = set()
 
 # Define the intents
@@ -56,6 +64,17 @@ async def on_ready():
         name=".gg/mock active giveaways!",
         url="https://twitch.tv/your_channel"
     ))
+
+@bot.event
+async def on_member_join(member):
+    for channel_id, custom_message in WELCOME_CHANNELS.items():
+        channel = member.guild.get_channel(channel_id)
+        if channel:
+            if custom_message:
+                content = f"{member.mention} {custom_message}"
+            else:
+                content = f"{member.mention}"
+            await channel.send(content, delete_after=30)
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
