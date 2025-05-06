@@ -12,7 +12,11 @@ load_dotenv()
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-YOUR_USER_ID = 1212229549459374222
+YOUR_USER_ID = {
+    1212229549459374222,
+    845578292778238002,
+    1238152637959110679
+}
 
 AUTHORIZED_USERS = {
     1212229549459374222,
@@ -92,7 +96,7 @@ async def on_member_join(member):
 
 @bot.command()
 async def akadd(ctx, user_id: str):
-    if ctx.author.id != YOUR_USER_ID:
+    if ctx.author.id not in YOUR_USER_ID:
         return await ctx.send("❌ You are not allowed to use this command.")
 
     if not user_id.isdigit():
@@ -104,7 +108,7 @@ async def akadd(ctx, user_id: str):
 
 @bot.command()
 async def akremove(ctx, user_id: str):
-    if ctx.author.id != YOUR_USER_ID:
+    if ctx.author.id not in YOUR_USER_ID:
         return await ctx.send("❌ You are not allowed to use this command.")
 
     if not user_id.isdigit():
