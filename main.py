@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import os
+import re
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
