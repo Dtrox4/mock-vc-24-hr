@@ -32,6 +32,9 @@ WELCOME_CHANNELS = {
 
 AUTO_KICK_USERS = set()
 
+# Users being skulled
+user_skull_list = set()
+
 # Define the intents
 intents=discord.Intents.all()
 intents.reactions = True
@@ -41,7 +44,6 @@ intents.voice_states = True      # Enable voice state intents
 
 # Create a bot instance with command prefix '!' and the specified intents
 bot = commands.Bot(command_prefix=commands.when_mentioned_or('.'), intents=discord.Intents.all())
-
 
 message_id_to_listen = None
 
