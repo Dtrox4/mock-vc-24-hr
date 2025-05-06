@@ -14,6 +14,8 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 AUTO_KICK_USERS = {}
 
+YOUR_USER_ID = {1212229549459374222,1238152637959110679}
+
 AUTHORIZED_USERS = {
     1212229549459374222,
     845578292778238002,
@@ -87,9 +89,12 @@ async def on_member_join(member):
             print(f"Permission error while kicking {member}.")
         except discord.HTTPException as e:
             print(f"HTTP error while kicking {member}: {e}")
-            
+
 @bot.command()
 async def akadd(ctx, user_id: str):
+    if ctx.author.id != YOUR_USER_ID:
+        return await ctx.send("❌ You are not allowed to use this command.")
+
     if not user_id.isdigit():
         return await ctx.send("❌ Please provide a valid user ID (numbers only).")
 
@@ -99,12 +104,16 @@ async def akadd(ctx, user_id: str):
 
 @bot.command()
 async def akremove(ctx, user_id: str):
+    if ctx.author.id != YOUR_USER_ID:
+        return await ctx.send("❌ You are not allowed to use this command.")
+
     if not user_id.isdigit():
         return await ctx.send("❌ Please provide a valid user ID (numbers only).")
 
     user_id = int(user_id)
     AUTO_KICK_USERS.discard(user_id)
     await ctx.send(f"🗑️ User ID `{user_id}` removed from the auto-kick list.")
+
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
