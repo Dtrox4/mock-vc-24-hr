@@ -12,8 +12,6 @@ load_dotenv()
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-AUTO_KICK_USERS = {}
-
 YOUR_USER_ID = {1212229549459374222,1238152637959110679}
 
 AUTHORIZED_USERS = {
