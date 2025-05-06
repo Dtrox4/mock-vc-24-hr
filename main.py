@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
+from goodboy_punisher import handle_goodboy_trigger, toggle_punishment_mode
 
 # Load environment variables from .env file
 load_dotenv()
@@ -93,6 +94,24 @@ async def on_member_join(member):
             print(f"Permission error while kicking {member}.")
         except discord.HTTPException as e:
             print(f"HTTP error while kicking {member}: {e}")
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    # Goodboy punishment trigger
+    await handle_goodboy_trigger(message)
+
+    await bot.process_commands(message)
+
+@bot.command()
+async def togglegb(ctx):
+    if ctx.author.id not in {1212229549459374222, 845578292778238002}:  # owners
+        return await ctx.send("❌ You're not allowed to use this command.")
+
+    new_mode = toggle_punishment_mode()
+    await ctx.send(f"✅ Punishment mode is now set to `{new_mode}`.")
 
 @bot.command()
 async def akadd(ctx, user_id: str):
