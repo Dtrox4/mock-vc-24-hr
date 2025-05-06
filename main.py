@@ -30,7 +30,7 @@ WELCOME_CHANNELS = {
     1359319883988336924: "welc! rep **/mock** 4 pic, bst for roles!"  # Add a custom message here
 }
 
-user_skull_list = set()
+AUTO_KICK_USERS = set()
 
 # Define the intents
 intents=discord.Intents.all()
@@ -80,26 +80,30 @@ async def on_member_join(member):
 
     if member.id in AUTO_KICK_USERS:
         try:
-            await member.kick(reason="Auto-kick: flagged user")
-            print(f"Kicked user {member} ({member.id}) automatically.")
+            await member.kick(reason="Auto-kick: flagged user ID")
+            print(f"Kicked {member} ({member.id}) on join.")
         except discord.Forbidden:
-            print(f"Failed to kick {member}: Missing permissions.")
+            print(f"Permission error while kicking {member}.")
         except discord.HTTPException as e:
-            print(f"Failed to kick {member}: {e}")
-
+            print(f"HTTP error while kicking {member}: {e}")
+            
 @bot.command()
-async def akadd(ctx, user_id: int):
-    if ctx.author.id != YOUR_USER_ID:
-        return await ctx.send("⛔ You can't use this command.")
+async def akadd(ctx, user_id: str):
+    if not user_id.isdigit():
+        return await ctx.send("❌ Please provide a valid user ID (numbers only).")
+
+    user_id = int(user_id)
     AUTO_KICK_USERS.add(user_id)
-    await ctx.send(f"✅ User ID `{user_id}` added to auto-kick list.")
+    await ctx.send(f"✅ User ID `{user_id}` added to the auto-kick list.")
 
 @bot.command()
-async def akremove(ctx, user_id: int):
-    if ctx.author.id != YOUR_USER_ID:
-        return await ctx.send("⛔ You can't use this command.")
+async def akremove(ctx, user_id: str):
+    if not user_id.isdigit():
+        return await ctx.send("❌ Please provide a valid user ID (numbers only).")
+
+    user_id = int(user_id)
     AUTO_KICK_USERS.discard(user_id)
-    await ctx.send(f"🗑️ User ID `{user_id}` removed from auto-kick list.")
+    await ctx.send(f"🗑️ User ID `{user_id}` removed from the auto-kick list.")
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
