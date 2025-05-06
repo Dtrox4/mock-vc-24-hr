@@ -88,6 +88,20 @@ async def on_member_join(member):
             print(f"Failed to kick {member}: {e}")
 
 @bot.command()
+async def akadd(ctx, user_id: int):
+    if ctx.author.id != YOUR_USER_ID:
+        return await ctx.send("⛔ You can't use this command.")
+    AUTO_KICK_USERS.add(user_id)
+    await ctx.send(f"✅ User ID `{user_id}` added to auto-kick list.")
+
+@bot.command()
+async def akremove(ctx, user_id: int):
+    if ctx.author.id != YOUR_USER_ID:
+        return await ctx.send("⛔ You can't use this command.")
+    AUTO_KICK_USERS.discard(user_id)
+    await ctx.send(f"🗑️ User ID `{user_id}` removed from auto-kick list.")
+
+@bot.command()
 async def joinvc(ctx, channel_id: int):
     # Get the channel by ID
     channel = bot.get_channel(channel_id)
@@ -215,22 +229,6 @@ async def on_message(message):
             print(f"Failed to add reaction: {e}")
 
     await bot.process_commands(message)
-
-@bot.command()
-async def akadd(ctx, user_id: int):
-    if ctx.author.id != YOUR_USER_ID:
-        return await ctx.send("⛔ You can't use this command.")
-    AUTO_KICK_USERS.add(user_id)
-    await ctx.send(f"✅ User ID `{user_id}` added to auto-kick list.")
-
-@bot.command()
-async def akremove(ctx, user_id: int):
-    if ctx.author.id != YOUR_USER_ID:
-        return await ctx.send("⛔ You can't use this command.")
-    AUTO_KICK_USERS.discard(user_id)
-    await ctx.send(f"🗑️ User ID `{user_id}` removed from auto-kick list.")
-
-
 
 bot.run(TOKEN)
 
