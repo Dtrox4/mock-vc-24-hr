@@ -2,6 +2,10 @@
 
 import discord
 from datetime import timedelta
+import re
+
+# Matches only 'good boy', 'goodboy', or 'gboy' as whole words, case-insensitive
+TRIGGER_KEYWORDS = re.compile(r"\b(?:good\s?boy|gboy)\b", re.IGNORECASE)
 
 JAILED_ROLE_NAME = "jailed"
 TARGET_USER_IDS = {
@@ -25,8 +29,8 @@ def toggle_punishment_mode():
 
 async def handle_goodboy_trigger(message: discord.Message):
     if message.reference and message.reference.resolved:
-        replied_to = message.reference.resolved.author
-        if replied_to.id in TARGET_USER_IDS and "good boy" in message.content.lower():
+    replied_to = message.reference.resolved
+    if replied_to.author.id in TARGET_USER_IDS and TRIGGER_KEYWORDS.search(message.content):
             if message.author.id in WHITELIST:
                 return
 
