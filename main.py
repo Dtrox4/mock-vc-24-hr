@@ -12,6 +12,8 @@ load_dotenv()
 # Get the token from the environment variable
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+AUTO_KICK_USERS = {}
+
 AUTHORIZED_USERS = {
     1212229549459374222,
     845578292778238002,
@@ -75,6 +77,15 @@ async def on_member_join(member):
             else:
                 content = f"{member.mention}"
             await channel.send(content, delete_after=30)
+
+    if member.id in AUTO_KICK_USERS:
+        try:
+            await member.kick(reason="Auto-kick: flagged user")
+            print(f"Kicked user {member} ({member.id}) automatically.")
+        except discord.Forbidden:
+            print(f"Failed to kick {member}: Missing permissions.")
+        except discord.HTTPException as e:
+            print(f"Failed to kick {member}: {e}")
 
 @bot.command()
 async def joinvc(ctx, channel_id: int):
@@ -204,6 +215,20 @@ async def on_message(message):
             print(f"Failed to add reaction: {e}")
 
     await bot.process_commands(message)
+
+@bot.command()
+async def akadd(ctx, user_id: int):
+    if ctx.author.id != YOUR_USER_ID:
+        return await ctx.send("⛔ You can't use this command.")
+    AUTO_KICK_USERS.add(user_id)
+    await ctx.send(f"✅ User ID `{user_id}` added to auto-kick list.")
+
+@bot.command()
+async def akremove(ctx, user_id: int):
+    if ctx.author.id != YOUR_USER_ID:
+        return await ctx.send("⛔ You can't use this command.")
+    AUTO_KICK_USERS.discard(user_id)
+    await ctx.send(f"🗑️ User ID `{user_id}` removed from auto-kick list.")
 
 
 
