@@ -30,7 +30,7 @@ WELCOME_CHANNELS = {
     1359319883988336924: "welc! rep **/mock** 4 pic, bst for roles!"  # Add a custom message here
 }
 
-AUTO_KICK_USERS = set()
+AUTO_KICK_USERS = {}
 
 # Users being skulled
 user_skull_list = set()
