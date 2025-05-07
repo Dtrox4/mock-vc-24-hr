@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
-from goodboy_punisher import handle_punishment, toggle_punishment_mode, get_mode
+from punishment_config import get_mode, toggle_punishment_mode
 
 # Load environment variables from .env file
 load_dotenv()
@@ -101,6 +101,14 @@ async def on_member_join(member):
         except discord.HTTPException as e:
             print(f"HTTP error while kicking {member}: {e}")
 
+@bot.command()
+async def togglep(ctx):
+    if ctx.author.id not in OWNER_IDS:
+        return await ctx.send("🚫 You can't use this command.")
+
+    new_mode = toggle_punishment_mode()
+    await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
+
 @bot.event
 async def on_message(message):
     if message.author.bot:
@@ -115,13 +123,13 @@ async def on_message(message):
             print(f"Failed to add reaction: {e}")
 
     if (
-        message.reference
-        and message.reference.resolved
-        and message.reference.resolved.author.id in TARGET_USER_IDS
-        and message.author.id not in WHITELIST_USER_IDS
-    ):
-        content = message.content.lower()
-        if any(word in content for word in TRIGGER_KEYWORDS):
+    message.reference
+    and message.reference.resolved
+    and message.reference.resolved.author.id in TARGET_USER_IDS
+    and message.author.id not in WHITELIST_USER_IDS
+):
+    content = message.content.lower()
+    if TRIGGER_KEYWORDS.search(content):
             mode = get_mode()
             if mode == "jail":
                 # Strip all roles except @everyone, then add jailed role
@@ -145,15 +153,6 @@ async def on_message(message):
                 print(f"Reply error: {e}")
     await bot.process_commands(message)
 
-
-
-@bot.command()
-async def togglep(ctx):
-    if ctx.author.id not in YOUR_USER_ID:
-        return await ctx.send("🚫 You can't use this command.")
-
-    new_mode = toggle_punishment_mode()
-    await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
 
 @bot.command()
 async def akadd(ctx, user_id: str):
