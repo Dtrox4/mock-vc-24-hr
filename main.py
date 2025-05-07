@@ -103,7 +103,7 @@ async def on_member_join(member):
 
 @bot.command()
 async def togglep(ctx):
-    if ctx.author.id not in OWNER_IDS:
+    if ctx.author.id not in YOUR_USER_ID:
         return await ctx.send("🚫 You can't use this command.")
 
     new_mode = toggle_punishment_mode()
