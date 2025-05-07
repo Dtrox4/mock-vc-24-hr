@@ -33,9 +33,6 @@ TARGET_USER_IDS = {1212229549459374222, 845578292778238002}
 WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 845578292778238002, 1177672910102614127}
 JAILED_ROLE_ID = 1359325650380652654
 
-# In your main.py (top level)
-jailed_users = {}  # {user_id: [role_ids]}
-
 # Define channels and optional messages
 WELCOME_CHANNELS = {
     1359328373356363987: None,
@@ -159,36 +156,6 @@ async def on_message(message):
                     
     await bot.process_commands(message)
 
-async def jail_user(member: discord.Member, jailed_role: discord.Role):
-    if member.id in jailed_users:
-        return  # Already jailed
-
-    # Save current roles (except @everyone and jailed_role)
-    roles_to_remove = [r for r in member.roles if r != member.guild.default_role and r.id != jailed_role.id]
-    jailed_users[member.id] = [r.id for r in roles_to_remove]
-
-    try:
-        await member.remove_roles(*roles_to_remove, reason="Jailed")
-        await member.add_roles(jailed_role, reason="Jailed")
-    except discord.Forbidden:
-        print(f"Missing permissions to modify roles for {member}")
-    except Exception as e:
-        print(f"Error jailing user: {e}")
-
-async def unjail_user(member: discord.Member, jailed_role: discord.Role):
-    saved_roles = jailed_users.get(member.id)
-    if saved_roles:
-        roles = [member.guild.get_role(rid) for rid in saved_roles if member.guild.get_role(rid)]
-        try:
-            await member.remove_roles(jailed_role, reason="Unjailed")
-            await member.add_roles(*roles, reason="Unjailed")
-            del jailed_users[member.id]
-        except discord.Forbidden:
-            print(f"Missing permissions to restore roles for {member}")
-        except Exception as e:
-            print(f"Error unjailing user: {e}")
-
-
 @bot.command()
 @commands.has_permissions(manage_roles=True)
 async def testjail(ctx, member: discord.Member):
@@ -206,16 +173,6 @@ async def testjail(ctx, member: discord.Member):
         await ctx.send("❌ I don't have permission to modify that user's roles.")
     except Exception as e:
         await ctx.send(f"❌ Error: {str(e)}")
-
-@bot.command()
-@commands.has_permissions(manage_roles=True)
-async def unjail(ctx, member: discord.Member):
-    jailed_role = ctx.guild.get_role(1359325650380652654)
-    if not jailed_role:
-        return await ctx.send("❌ Jailed role not found.")
-
-    await unjail_user(member, jailed_role)
-    await ctx.send(f"✅ {member.mention} has been unjailed.")
 
 @bot.command()
 async def togglep(ctx):
