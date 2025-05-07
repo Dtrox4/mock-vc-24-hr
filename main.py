@@ -101,10 +101,18 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # Goodboy punishment trigger
+    if message.author.id in user_skull_list:
+        try:
+            await message.add_reaction("☠️")
+        except discord.Forbidden:
+            print(f"Missing permissions to react in {message.channel.name}")
+        except discord.HTTPException as e:
+            print(f"Failed to add reaction: {e}")
+
     await handle_punishment(message)
 
     await bot.process_commands(message)
+
 
 @bot.command()
 async def togglep(ctx):
@@ -253,20 +261,6 @@ async def authorized(ctx):
     )
     await ctx.send(embed=embed)
     
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-
-    if message.author.id in user_skull_list:
-        try:
-            await message.add_reaction("☠️")
-        except discord.Forbidden:
-            print(f"Missing permissions to react in {message.channel.name}")
-        except discord.HTTPException as e:
-            print(f"Failed to add reaction: {e}")
-
-    await bot.process_commands(message)
 
 bot.run(TOKEN)
 
