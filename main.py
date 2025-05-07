@@ -102,6 +102,24 @@ async def on_member_join(member):
             print(f"HTTP error while kicking {member}: {e}")
 
 @bot.command()
+@commands.has_permissions(manage_roles=True)
+async def testjail(ctx, member: discord.Member):
+    jailed_role = ctx.guild.get_role(1359325650380652654)  # Jailed role ID
+    if not jailed_role:
+        return await ctx.send("❌ Jailed role not found.")
+
+    roles_to_remove = [r for r in member.roles if r != ctx.guild.default_role and r.id != jailed_role.id]
+
+    try:
+        await member.remove_roles(*roles_to_remove, reason="Testing jail")
+        await member.add_roles(jailed_role, reason="Testing jail")
+        await ctx.send(f"✅ {member.mention} has been jailed successfully.")
+    except discord.Forbidden:
+        await ctx.send("❌ I don't have permission to modify that user's roles.")
+    except Exception as e:
+        await ctx.send(f"❌ Error: {str(e)}")
+
+@bot.command()
 async def togglep(ctx):
     if ctx.author.id not in YOUR_USER_ID:
         return await ctx.send("🚫 You can't use this command.")
@@ -136,7 +154,7 @@ async def on_message(message):
                     jailed_role = message.guild.get_role(JAILED_ROLE_ID)
                     if jailed_role:
                         try:
-                            roles_to_remove = [role for role in message.author.roles if role.name != "@everyone"]
+                            roles_to_remove = [r for r in message.author.roles if r != message.guild.default_role and r.id != JAILED_ROLE_ID]
                             await message.author.remove_roles(*roles_to_remove)
                             await message.author.add_roles(jailed_role)
                         except Exception as e:
