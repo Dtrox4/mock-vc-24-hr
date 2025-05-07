@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
-from goodboy_punisher import handle_goodboy_trigger, toggle_punishment_mode
+from goodboy_punisher import handle_punishment, toggle_punishment_mode
 
 # Load environment variables from .env file
 load_dotenv()
@@ -102,17 +102,17 @@ async def on_message(message):
         return
 
     # Goodboy punishment trigger
-    await handle_goodboy_trigger(message)
+    await handle_punishment(message)
 
     await bot.process_commands(message)
 
 @bot.command()
-async def togglegb(ctx):
-    if ctx.author.id not in {1212229549459374222, 845578292778238002}:  # owners
-        return await ctx.send("❌ You're not allowed to use this command.")
-
+async def togglep(ctx):
+    if ctx.author.id not in [1212229549459374222, 845578292778238002]:  # Replace with your real admin IDs
+        return await ctx.send("❌ You don't have permission to toggle punishment mode.")
+    
     new_mode = toggle_punishment_mode()
-    await ctx.send(f"✅ Punishment mode is now set to `{new_mode}`.")
+    await ctx.send(f"✅ Punishment mode is now set to **{new_mode}**.")
 
 @bot.command()
 async def akadd(ctx, user_id: str):
