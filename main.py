@@ -114,8 +114,8 @@ async def on_message(message):
             print(f"Failed to add reaction: {e}")
 
      if message.reference and message.reference.resolved:
-        replied_to = message.reference.resolved.author
-        if replied_to.id in TARGET_USER_IDS:
+         replied_to = message.reference.resolved.author
+         if replied_to.id in TARGET_USER_IDS:
             content = message.content.lower()
             if TRIGGER_KEYWORDS.search(content):
                 await handle_punishment(message)
