@@ -31,7 +31,7 @@ AUTHORIZED_USERS = {
 TRIGGER_KEYWORDS = re.compile(r"\b(good\s?boy|gboy|goodboy)\b", re.IGNORECASE)
 TARGET_USER_IDS = {1212229549459374222, 845578292778238002}
 WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 845578292778238002, 1177672910102614127}
-JAIL_ROLE_ID = 1359325650380652654
+JAILED_ROLE_ID = 1359325650380652654
 
 # Define channels and optional messages
 WELCOME_CHANNELS = {
@@ -121,7 +121,7 @@ async def on_message(message):
         and message.author.id not in WHITELIST_USER_IDS
     ):
         content = message.content.lower()
-        if any(word in content for word in TRIGGER_WORDS):
+        if any(word in content for word in TRIGGER_KEYWORDS):
             mode = get_mode()
             if mode == "jail":
                 # Strip all roles except @everyone, then add jailed role
