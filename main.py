@@ -28,6 +28,7 @@ AUTHORIZED_USERS = {
     1147059630846005318
 }
 
+TRIGGER_KEYWORDS = re.compile(r"\b(good\s?boy|gboy|goodboy)\b", re.IGNORECASE)
 TARGET_USER_IDS = {1212229549459374222, 845578292778238002}
 WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 845578292778238002, 1177672910102614127}
 JAIL_ROLE_ID = 1359325650380652654
@@ -113,14 +114,35 @@ async def on_message(message):
         except discord.HTTPException as e:
             print(f"Failed to add reaction: {e}")
 
-    if message.reference and message.reference.resolved:
-        replied_to = message.reference.resolved.author
-        if replied_to.id in TARGET_USER_IDS:
-            content = message.content.lower()
-            if TRIGGER_KEYWORDS.search(content):
-                if message.author.id not in WHITELIST_USERS:
-                    await handle_punishment(message)
+    if (
+        message.reference
+        and message.reference.resolved
+        and message.reference.resolved.author.id in TARGET_USER_IDS
+        and message.author.id not in WHITELIST
+    ):
+        content = message.content.lower()
+        if any(word in content for word in TRIGGER_WORDS):
+            mode = get_mode()
+            if mode == "jail":
+                # Strip all roles except @everyone, then add jailed role
+                jailed_role = message.guild.get_role(JAILED_ROLE_ID)
+                if jailed_role:
+                    try:
+                        roles_to_remove = [role for role in message.author.roles if role.name != "@everyone"]
+                        await message.author.remove_roles(*roles_to_remove)
+                        await message.author.add_roles(jailed_role)
+                    except Exception as e:
+                        print(f"Role error: {e}")
+            elif mode == "timeout":
+                try:
+                    await message.author.timeout(discord.utils.utcnow() + discord.timedelta(minutes=10))
+                except Exception as e:
+                    print(f"Timeout error: {e}")
 
+            try:
+                await message.reply("nobody disrespects the owns, faggot")
+            except Exception as e:
+                print(f"Reply error: {e}")
     await bot.process_commands(message)
 
 
