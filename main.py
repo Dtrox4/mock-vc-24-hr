@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
 from punishment_config import get_mode, toggle_punishment_mode
+from jail_utils import store_user_roles, retrieve_user_roles
 
 # Load environment variables from .env file
 load_dotenv()
@@ -133,10 +134,12 @@ async def on_message(message):
             if get_mode() == "jail":
                 jailed_role = message.guild.get_role(JAILED_ROLE_ID)
                 if jailed_role:
+                    # inside the jail block
                     roles_to_remove = [
                         r for r in message.author.roles
                         if r != message.guild.default_role and r.id != JAILED_ROLE_ID
                     ]
+                    store_user_roles(message.author.id, [r.id for r in roles_to_remove])
                     await message.author.remove_roles(*roles_to_remove)
                     await message.author.add_roles(jailed_role)
                 else:
@@ -181,6 +184,22 @@ async def togglep(ctx):
 
     new_mode = toggle_punishment_mode()
     await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
+
+@bot.command(name="unjail")
+@commands.has_permissions(administrator=True)
+async def unjail(ctx, member: discord.Member):
+    jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
+    if jailed_role in member.roles:
+        try:
+            await member.remove_roles(jailed_role)
+            role_ids = retrieve_user_roles(member.id)
+            roles = [ctx.guild.get_role(rid) for rid in role_ids if ctx.guild.get_role(rid)]
+            await member.add_roles(*roles)
+            await ctx.send(f"{member.mention} has been unjailed and roles restored.")
+        except Exception as e:
+            await ctx.send(f"Error unjailing: {e}")
+    else:
+        await ctx.send("User is not jailed.")
 
 
 @bot.command()
