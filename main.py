@@ -117,44 +117,45 @@ async def on_message(message):
         except discord.HTTPException as e:
             print(f"Failed to add reaction: {e}")
 
+    if message.id in handled_messages:
+        return
+
     if not message.reference or not message.reference.resolved:
         return
 
-    # Ensure there is a message reference and the user is in the target list
     replied_to = message.reference.resolved.author
 
-    if replied_to.id in TARGET_USER_IDS and message.author.id not in WHITELIST_USER_IDS:
-        content = message.content.lower()
+    if (
+        replied_to.id in TARGET_USER_IDS
+        and message.author.id not in WHITELIST_USER_IDS
+        and TRIGGER_KEYWORDS.search(message.content.lower())
+    ):
+        handled_messages.add(message.id)
 
-        if TRIGGER_KEYWORDS.search(content):
-            # Prevent multiple punishments for the same message
-            if not hasattr(message, "_handled_gboy"):
-                setattr(message, "_handled_gboy", True)
+        try:
+            if get_mode() == "jail":
+                jailed_role = message.guild.get_role(JAILED_ROLE_ID)
+                if jailed_role:
+                    roles_to_remove = [
+                        r for r in message.author.roles
+                        if r != message.guild.default_role and r.id != JAILED_ROLE_ID
+                    ]
+                    await message.author.remove_roles(*roles_to_remove)
+                    await message.author.add_roles(jailed_role)
+                else:
+                    print("Jailed role not found.")
+            elif get_mode() == "timeout":
+                await message.author.timeout(
+                    discord.utils.utcnow() + timedelta(minutes=10),
+                    reason="Disrespectful message"
+                )
+        except Exception as e:
+            print(f"Punishment error: {e}")
 
-                mode = await get_mode()
-
-                try:
-                    if mode == "jail":
-                        # Strip all roles except @everyone, then add jailed role
-                        jailed_role = message.guild.get_role(JAILED_ROLE_ID)
-                        if jailed_role:
-                            roles_to_remove = [r for r in message.author.roles if r != message.guild.default_role and r.id != JAILED_ROLE_ID]
-                            await message.author.remove_roles(*roles_to_remove)
-                            await message.author.add_roles(jailed_role)
-                        else:
-                            print("Jailed role not found.")
-                    elif mode == "timeout":
-                        # Timeout for 10 minutes
-                        await message.author.timeout(discord.utils.utcnow() + timedelta(minutes=10), reason="Disrespectful message")
-                    else:
-                        print("Punishment mode not set correctly.")
-                except Exception as e:
-                    print(f"Error applying punishment: {e}")
-
-                try:
-                    await message.reply("nobody disrespects the owns, faggot", mention_author=False)
-                except Exception as e:
-                    print(f"Reply error: {e}")
+        try:
+            await message.reply("nobody disrespects the owns, faggot", mention_author=True)
+        except Exception as e:
+            print(f"Reply error: {e}")
                     
     await bot.process_commands(message)
 
