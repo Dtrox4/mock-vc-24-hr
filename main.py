@@ -107,9 +107,8 @@ async def on_member_join(member):
 
 @bot.command()
 async def togglep(ctx):
-    if ctx.author.id not in YOUR_USER_ID:
+    if ctx.author.id not in YOUR_USER_IDS:
         return await ctx.send("🚫 You can't use this command.")
-
     new_mode = toggle_punishment_mode()
     await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
 
@@ -117,12 +116,13 @@ async def togglep(ctx):
 @commands.has_permissions(administrator=True)
 async def unjail(ctx, member: discord.Member):
     jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
-    if jailed_role in member.roles:
+    if jailed_role and jailed_role in member.roles:
         try:
             await member.remove_roles(jailed_role)
             role_ids = retrieve_user_roles(member.id)
             roles = [ctx.guild.get_role(rid) for rid in role_ids if ctx.guild.get_role(rid)]
-            await member.add_roles(*roles)
+            if roles:
+                await member.add_roles(*roles)
             await ctx.send(f"{member.mention} has been unjailed and roles restored.")
         except Exception as e:
             await ctx.send(f"Error unjailing: {e}")
@@ -132,15 +132,15 @@ async def unjail(ctx, member: discord.Member):
 @bot.command()
 @commands.has_permissions(manage_roles=True)
 async def testjail(ctx, member: discord.Member):
-    jailed_role = ctx.guild.get_role(1359325650380652654)  # Jailed role ID
+    jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
     if not jailed_role:
         return await ctx.send("❌ Jailed role not found.")
 
-    roles_to_remove = [r for r in member.roles if r != ctx.guild.default_role and r.id != jailed_role.id]
-
+    roles_to_remove = [r for r in member.roles if r != ctx.guild.default_role and r.id != JAILED_ROLE_ID]
     try:
         await member.remove_roles(*roles_to_remove, reason="Testing jail")
         await member.add_roles(jailed_role, reason="Testing jail")
+        store_user_roles(member.id, [r.id for r in roles_to_remove])
         await ctx.send(f"✅ {member.mention} has been jailed successfully.")
     except discord.Forbidden:
         await ctx.send("❌ I don't have permission to modify that user's roles.")
