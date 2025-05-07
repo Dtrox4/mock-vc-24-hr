@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import asyncio
 from threading import Thread
-from goodboy_punisher import handle_punishment, toggle_punishment_mode
+from goodboy_punisher import handle_punishment, toggle_punishment_mode, PUNISHMENT_MODE 
 
 # Load environment variables from .env file
 load_dotenv()
@@ -27,6 +27,10 @@ AUTHORIZED_USERS = {
     1305007578857869403,
     1147059630846005318
 }
+
+TARGET_USER_IDS = {1212229549459374222, 845578292778238002, 1177672910102614127}
+WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 845578292778238002, 1177672910102614127}
+JAIL_ROLE_ID = 1359325650380652654
 
 # Define channels and optional messages
 WELCOME_CHANNELS = {
