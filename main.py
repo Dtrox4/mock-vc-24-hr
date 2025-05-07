@@ -118,7 +118,7 @@ async def on_message(message):
         message.reference
         and message.reference.resolved
         and message.reference.resolved.author.id in TARGET_USER_IDS
-        and message.author.id not in WHITELIST
+        and message.author.id not in WHITELIST_USER_IDS
     ):
         content = message.content.lower()
         if any(word in content for word in TRIGGER_WORDS):
