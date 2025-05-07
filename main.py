@@ -44,6 +44,9 @@ WELCOME_CHANNELS = {
 
 AUTO_KICK_USERS = set()
 
+#handle multiple punishment error
+handled_messages = set()
+
 # Users being skulled
 user_skull_list = set()
 
@@ -117,6 +120,8 @@ async def on_message(message):
 
     if message.id in handled_messages:
         return
+    handled_messages.add(message.id)
+
 
     if not message.reference or not message.reference.resolved:
         return
