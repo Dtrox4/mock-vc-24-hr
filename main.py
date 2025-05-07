@@ -108,7 +108,7 @@ async def on_message(message):
 
 @bot.command()
 async def togglep(ctx):
-    if ctx.author.id not in [1212229549459374222, 845578292778238002]:  # Replace with your real admin IDs
+    if ctx.author.id not in YOUR_USER_ID:  # Replace with your real admin IDs
         return await ctx.send("❌ You don't have permission to toggle punishment mode.")
     
     new_mode = toggle_punishment_mode()
