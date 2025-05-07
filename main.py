@@ -113,7 +113,12 @@ async def on_message(message):
         except discord.HTTPException as e:
             print(f"Failed to add reaction: {e}")
 
-    await handle_punishment(message)
+     if message.reference and message.reference.resolved:
+        replied_to = message.reference.resolved.author
+        if replied_to.id in TARGET_USER_IDS:
+            content = message.content.lower()
+            if TRIGGER_KEYWORDS.search(content):
+                await handle_punishment(message)
 
     await bot.process_commands(message)
 
