@@ -123,34 +123,34 @@ async def on_message(message):
             print(f"Failed to add reaction: {e}")
 
     if (
-    message.reference
-    and message.reference.resolved
-    and message.reference.resolved.author.id in TARGET_USER_IDS
-    and message.author.id not in WHITELIST_USER_IDS
-):
-    content = message.content.lower()
-    if TRIGGER_KEYWORDS.search(content):
-            mode = get_mode()
-            if mode == "jail":
-                # Strip all roles except @everyone, then add jailed role
-                jailed_role = message.guild.get_role(JAILED_ROLE_ID)
-                if jailed_role:
+        message.reference
+        and message.reference.resolved
+        and message.reference.resolved.author.id in TARGET_USER_IDS
+        and message.author.id not in WHITELIST_USER_IDS
+    ):
+        content = message.content.lower()
+        if TRIGGER_KEYWORDS.search(content):
+                mode = get_mode()
+                if mode == "jail":
+                    # Strip all roles except @everyone, then add jailed role
+                    jailed_role = message.guild.get_role(JAILED_ROLE_ID)
+                    if jailed_role:
+                        try:
+                            roles_to_remove = [role for role in message.author.roles if role.name != "@everyone"]
+                            await message.author.remove_roles(*roles_to_remove)
+                            await message.author.add_roles(jailed_role)
+                        except Exception as e:
+                            print(f"Role error: {e}")
+                elif mode == "timeout":
                     try:
-                        roles_to_remove = [role for role in message.author.roles if role.name != "@everyone"]
-                        await message.author.remove_roles(*roles_to_remove)
-                        await message.author.add_roles(jailed_role)
+                        await message.author.timeout(discord.utils.utcnow() + discord.timedelta(minutes=10))
                     except Exception as e:
-                        print(f"Role error: {e}")
-            elif mode == "timeout":
+                        print(f"Timeout error: {e}")
+    
                 try:
-                    await message.author.timeout(discord.utils.utcnow() + discord.timedelta(minutes=10))
+                    await message.reply("nobody disrespects the owns, faggot")
                 except Exception as e:
-                    print(f"Timeout error: {e}")
-
-            try:
-                await message.reply("nobody disrespects the owns, faggot")
-            except Exception as e:
-                print(f"Reply error: {e}")
+                    print(f"Reply error: {e}")
     await bot.process_commands(message)
 
 
