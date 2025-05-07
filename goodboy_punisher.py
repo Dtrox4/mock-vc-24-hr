@@ -4,55 +4,57 @@ import discord
 from datetime import timedelta
 import re
 
-# Matches only 'good boy', 'goodboy', or 'gboy' as whole words, case-insensitive
-TRIGGER_KEYWORDS = re.compile(r"\b(?:good\s?boy|gboy)\b", re.IGNORECASE)
+TRIGGER_KEYWORDS = re.compile(r"\b(good\s?boy|gboy|goodboy)\b", re.IGNORECASE)
+TARGET_USER_IDS = {1212229549459374222, 845578292778238002, 1177672910102614127}
+WHITELIST_USER_IDS = {1305007578857869403}
+JAIL_ROLE_ID = 1359325650380652654
 
-JAILED_ROLE_NAME = "jailed"
-TARGET_USER_IDS = {
-    1212229549459374222,
-    845578292778238002,
-    1177672910102614127,
-}
-WHITELIST = {
-    1269821629614264362
-}
+# Can be toggled at runtime if needed
+PUNISHMENT_MODE = {"mode": "jail"}  # or "timeout"
 
-# Default mode
-punishment_mode = "jail"  # or "timeout"
-
+def toggle_punishment_mode():
+    PUNISHMENT_MODE["mode"] = "timeout" if PUNISHMENT_MODE["mode"] == "jail" else "jail"
+    return PUNISHMENT_MODE["mode"]
 
 def toggle_punishment_mode():
     global punishment_mode
     punishment_mode = "timeout" if punishment_mode == "jail" else "jail"
     return punishment_mode
 
+async def handle_punishment(message):
+    if not message.reference or not message.reference.resolved:
+        return
 
-async def handle_goodboy_trigger(message: discord.Message):
-    if message.reference and message.reference.resolved:
-    replied_to = message.reference.resolved
-    if replied_to.author.id in TARGET_USER_IDS and TRIGGER_KEYWORDS.search(message.content):
-            if message.author.id in WHITELIST:
+    replied_to = message.reference.resolved.author
+    if replied_to.id not in TARGET_USER_IDS:
+        return
+
+    if message.author.id in WHITELIST_USER_IDS:
+        return  # Ignore whitelisted users
+
+    if not TRIGGER_KEYWORDS.search(message.content):
+        return  # No trigger found
+
+    try:
+        guild = message.guild
+        member = message.author
+
+        if PUNISHMENT_MODE == "timeout":
+            await member.timeout(discord.utils.utcnow() + discord.timedelta(minutes=10), reason="Disrespect")
+        elif PUNISHMENT_MODE == "jail":
+            jailed_role = guild.get_role(JAIL_ROLE_ID)
+            if jailed_role is None:
+                await message.channel.send("⚠️ Jailed role not found.")
                 return
 
-            guild = message.guild
+            # Remove all roles except @everyone and add jailed role
+            roles_to_remove = [role for role in member.roles if role != guild.default_role]
+            if roles_to_remove:
+                await member.remove_roles(*roles_to_remove, reason="Used banned phrase")
 
-            if punishment_mode == "jail":
-                jailed_role = discord.utils.get(guild.roles, name=JAILED_ROLE_NAME)
-                if not jailed_role:
-                    jailed_role = await guild.create_role(name=JAILED_ROLE_NAME)
-                    for channel in guild.channels:
-                        await channel.set_permissions(jailed_role, send_messages=False, speak=False)
+            await member.add_roles(jailed_role, reason="Punishment")
 
-                roles_to_remove = [r for r in message.author.roles if r.name != "@everyone"]
-                try:
-                    await message.author.remove_roles(*roles_to_remove, reason="Used forbidden phrase.")
-                    await message.author.add_roles(jailed_role, reason="Punishment: said 'good boy'")
-                except discord.Forbidden:
-                    print(f"Missing permissions to punish {message.author}")
-            else:  # timeout mode
-                try:
-                    await message.author.timeout(duration=timedelta(minutes=10), reason="Punishment: said 'good boy'")
-                except discord.Forbidden:
-                    print(f"Missing permissions to timeout {message.author}")
+        await message.reply("Nobody disrespects the owns, faggot.")
 
-            await message.reply("nobody disrespects the owns, faggot")
+    except discord.Forbidden:
+        await message.channel.send("⚠️ I lack permissions to punish that user.")
