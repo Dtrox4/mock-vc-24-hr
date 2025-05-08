@@ -144,7 +144,6 @@ async def on_message(message):
         and (message.author.id not in WHITELIST_USER_IDS and message.author.id not in WHITELIST_USER_M)
         and (TRIGGER_KEYWORDS.search(message.content.lower()) or TRIGGER_M.search(message.content.lower()))
     ):
-        handled_messages.add(message.id)
 
         try:
             if get_mode() == "jail":
@@ -162,9 +161,10 @@ async def on_message(message):
                     jail_channel = bot.get_channel(1359325648912515264)
                     if jail_channel:
                         await jail_channel.send(
-                            f"<@{member.id}>, you have been jailed. Please wait for a staff member to discuss your jail. "
+                            f"<@{message.author.id}>, you have been jailed. Please wait for a staff member to discuss your jail. "
                             "For more information, your bitchass go jailed cause you can't behave sit down slut."
                         )
+
                     else:
                         print("⚠️ Jail channel not found.")
                 else:
