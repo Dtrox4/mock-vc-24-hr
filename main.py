@@ -40,7 +40,7 @@ JAILED_ROLE_ID = 1359325650380652654
 # Define channels and optional messages
 WELCOME_CHANNELS = {
     1359328373356363987: None,
-    1360104912939257978: None,
+    1369944674495893534: None,
     1366327489122668644: None,
     1359319883988336924: "welc! rep **/mock** 4 pic, bst for roles!"  # Add a custom message here
 }
