@@ -170,7 +170,7 @@ async def on_message(message):
 
 @bot.command()
 async def togglep(ctx):
-    if ctx.author.id not in YOUR_USER_IDS:
+    if ctx.author.id not in YOUR_USER_ID:
         return await ctx.send("🚫 You can't use this command.")
     new_mode = toggle_punishment_mode()
     await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
