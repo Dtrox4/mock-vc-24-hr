@@ -32,10 +32,16 @@ AUTHORIZED_USERS = {
     1088004084084256839
 }
 
+#BOYS
 TRIGGER_KEYWORDS = re.compile(r"\b(good\s?boy|gboy|goodboy)\b", re.IGNORECASE)
 TARGET_USER_IDS = {1212229549459374222, 845578292778238002, 1088004084084256839, 1177672910102614127}
 WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 845578292778238002, 1177672910102614127, 1088004084084256839, 1177672910102614127}
 JAILED_ROLE_ID = 1359325650380652654
+
+#MARYAM
+TRIGGER_M = re.compile(r"\b(good\s?girl|mommy|shawty|hoe|bitch|loser|slit|slut|cut|faggot|ho)\b", re.IGNORECASE)
+TARGET_USER_M = 1269821629614264362
+WHITELIST_USER_M = {1305007578857869403, 1212229549459374222, 767662700725403658, 940295461753987132, 713576608136429618}
 
 # Define channels and optional messages
 WELCOME_CHANNELS = {
@@ -134,9 +140,9 @@ async def on_message(message):
     replied_to = message.reference.resolved.author
 
     if (
-        replied_to.id in TARGET_USER_IDS
-        and message.author.id not in WHITELIST_USER_IDS
-        and TRIGGER_KEYWORDS.search(message.content.lower())
+        (replied_to.id in TARGET_USER_IDS or replied_to.id == TARGET_USER_M)
+        and (message.author.id not in WHITELIST_USER_IDS and message.author.id not in WHITELIST_USER_M)
+        and (TRIGGER_KEYWORDS.search(message.content.lower()) or TRIGGER_M.search(message.content.lower()))
     ):
         handled_messages.add(message.id)
 
@@ -163,10 +169,9 @@ async def on_message(message):
             print(f"Punishment error: {e}")
 
         try:
-            await message.reply("nobody disrespects the owns, faggot", mention_author=True)
+            await message.reply("know your place, hoe ass nigga.", mention_author=True)
         except Exception as e:
             print(f"Reply error: {e}")
-
 
 @bot.command()
 async def togglep(ctx):
