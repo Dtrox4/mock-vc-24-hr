@@ -176,7 +176,7 @@ async def togglep(ctx):
     await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
 
 @bot.command(name="unjail")
-
+@commands.has_permissions(administrator=True)
 async def unjail(ctx, member: discord.Member):
     jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
     if jailed_role and jailed_role in member.roles:
