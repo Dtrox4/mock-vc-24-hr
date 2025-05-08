@@ -158,6 +158,15 @@ async def on_message(message):
                     store_user_roles(message.author.id, [r.id for r in roles_to_remove])
                     await message.author.remove_roles(*roles_to_remove)
                     await message.author.add_roles(jailed_role)
+                    # Send the message in the jail channel
+                    jail_channel = bot.get_channel(1359325648912515264)
+                    if jail_channel:
+                        await jail_channel.send(
+                            f"<@{member.id}>, you have been jailed. Please wait for a staff member to discuss your jail. "
+                            "For more information, your bitchass go jailed cause you can't behave sit down slut."
+                        )
+                    else:
+                        print("⚠️ Jail channel not found.")
                 else:
                     print("Jailed role not found.")
             elif get_mode() == "timeout":
