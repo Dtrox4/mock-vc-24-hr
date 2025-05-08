@@ -168,7 +168,8 @@ async def on_message(message):
             print(f"Reply error: {e}")
 
 
-@bot.command()
+@bot.command(name="togglep")
+@commands.has_permissions(administrator=True)
 async def togglep(ctx):
     if ctx.author.id not in YOUR_USER_IDS:
         return await ctx.send("🚫 You can't use this command.")
@@ -176,7 +177,7 @@ async def togglep(ctx):
     await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
 
 @bot.command(name="unjail")
-@commands.has_permissions(administrator=True)
+
 async def unjail(ctx, member: discord.Member):
     jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
     if jailed_role and jailed_role in member.roles:
