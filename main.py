@@ -168,8 +168,7 @@ async def on_message(message):
             print(f"Reply error: {e}")
 
 
-@bot.command(name="togglep")
-@commands.has_permissions(administrator=True)
+@bot.command()
 async def togglep(ctx):
     if ctx.author.id not in YOUR_USER_IDS:
         return await ctx.send("🚫 You can't use this command.")
