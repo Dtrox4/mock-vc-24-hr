@@ -196,7 +196,7 @@ async def togglep(ctx):
     await ctx.send(f"✅ Punishment mode switched to `{new_mode}`.")
 
 @bot.command(name="unjail")
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(manage_roles=True)
 async def unjail(ctx, member: discord.Member):
     jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
     if jailed_role and jailed_role in member.roles:
@@ -213,7 +213,7 @@ async def unjail(ctx, member: discord.Member):
         await ctx.send("User is not jailed.")
 
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(manage_roles=True)
 async def jail(ctx, member: discord.Member):
     jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
     if not jailed_role:
@@ -231,7 +231,7 @@ async def jail(ctx, member: discord.Member):
         await ctx.send(f"❌ Error: {str(e)}")
 
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(manage_messages=True)
 async def purge(ctx, *args):
     if not args:
         return await ctx.send("⚠️ Please specify at least one word to filter messages by.")
