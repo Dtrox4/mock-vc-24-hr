@@ -39,9 +39,9 @@ WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 8455782927782380
 JAILED_ROLE_ID = 1359325650380652654
 
 #MARYAM
-TRIGGER_M = re.compile(r"\b(good\s?girl|mommy|shawty|hoe|slut|faggot|ho)\b", re.IGNORECASE)
+TRIGGER_M = re.compile(r"\b(good\s?girl|mommy|shawty|bitch|whore|goodgirl|hoe|slut|faggot|ho)\b", re.IGNORECASE)
 TARGET_USER_M = 1269821629614264362
-WHITELIST_USER_M = {1305007578857869403, 1212229549459374222, 767662700725403658, 940295461753987132, 713576608136429618}
+WHITELIST_USER_M = {1305007578857869403, 1212229549459374222, 767662700725403658, 940295461753987132, 713576608136429618, 1369688693337624650, 1003140111258624011, 1196446087972667555, 764189912740134932, 1170371030410350734, 1212398197972926496}
 
 # Define channels and optional messages
 WELCOME_CHANNELS = {
@@ -140,11 +140,14 @@ async def on_message(message):
     replied_to = message.reference.resolved.author
 
     if (
-        (replied_to.id in TARGET_USER_IDS or replied_to.id == TARGET_USER_M)
-        and (message.author.id not in WHITELIST_USER_IDS or message.author.id not in WHITELIST_USER_M)
-        and (TRIGGER_KEYWORDS.search(message.content.lower()) or TRIGGER_M.search(message.content.lower()))
+        (replied_to.id in TARGET_USER_IDS
+         and message.author.id not in WHITELIST_USER_IDS
+         and TRIGGER_KEYWORDS.search(message.content.lower()))
+        or
+        (replied_to.id == TARGET_USER_M
+         and message.author.id not in WHITELIST_USER_M
+         and TRIGGER_M.search(message.content.lower()))
     ):
-
         try:
             if get_mode() == "jail":
                 jailed_role = message.guild.get_role(JAILED_ROLE_ID)
@@ -178,7 +181,10 @@ async def on_message(message):
             print(f"Punishment error: {e}")
 
         try:
-            await message.reply("know your place, hoe ass nigga.", mention_author=True)
+            if replied_to.id in TARGET_USER_IDS:
+                await message.reply("know your place, dumb nigga.", mention_author=True)
+            elif replied_to.id == TARGET_USER_M:
+                await message.reply("nuh uh you're cooked.", mention_author=True)
         except Exception as e:
             print(f"Reply error: {e}")
 
@@ -207,8 +213,8 @@ async def unjail(ctx, member: discord.Member):
         await ctx.send("User is not jailed.")
 
 @bot.command()
-@commands.has_permissions(manage_roles=True)
-async def testjail(ctx, member: discord.Member):
+@commands.has_permissions(administrator=True)
+async def jail(ctx, member: discord.Member):
     jailed_role = ctx.guild.get_role(JAILED_ROLE_ID)
     if not jailed_role:
         return await ctx.send("❌ Jailed role not found.")
@@ -223,6 +229,26 @@ async def testjail(ctx, member: discord.Member):
         await ctx.send("❌ I don't have permission to modify that user's roles.")
     except Exception as e:
         await ctx.send(f"❌ Error: {str(e)}")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def purge(ctx, *args):
+    if not args:
+        return await ctx.send("⚠️ Please specify at least one word to filter messages by.")
+
+    limit = 200
+    keywords = [arg.lower() for arg in args if not arg.isdigit()]
+    limit_args = [int(arg) for arg in args if arg.isdigit()]
+    if limit_args:
+        limit = min(limit_args[0], 200)
+
+    def check(m):
+        return any(word in m.content.lower() for word in keywords)
+
+    deleted = await ctx.channel.purge(limit=limit, check=check)
+    confirm = await ctx.send(f"🧹 Deleted {len(deleted)} message(s) containing: {', '.join(keywords)}.")
+    await asyncio.sleep(5)
+    await confirm.delete()
 
 
 @bot.command()
