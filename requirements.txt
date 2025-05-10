@@ -2,3 +2,4 @@ discord.py[voice]
 discord
 python-dotenv
 flask
+homoglyphs
