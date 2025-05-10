@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import os
+from homoglyphs import Homoglyphs
 import re
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -42,6 +43,16 @@ JAILED_ROLE_ID = 1359325650380652654
 TRIGGER_M = re.compile(r"\b(good\s?girl|mommy|shawty|bitch|whore|goodgirl|hoe|slut|faggot|ho)\b", re.IGNORECASE)
 TARGET_USER_M = 1269821629614264362
 WHITELIST_USER_M = {1305007578857869403, 1212229549459374222, 767662700725403658, 940295461753987132, 713576608136429618, 1369688693337624650, 1003140111258624011, 1196446087972667555, 764189912740134932, 1170371030410350734, 1212398197972926496}
+
+h = Homoglyphs()
+
+BANNED_WORDS_PATTERN = re.compile(
+    r"""\b(
+        r[\W_]*[a@4][\W_]*p[\W_]*[e3]([ds]?)?
+        | r[\W_]*[p][\W_]*[e3]
+    )\b""",
+    re.IGNORECASE | re.VERBOSE
+)
 
 # Define channels and optional messages
 WELCOME_CHANNELS = {
@@ -118,6 +129,23 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author.bot:
         return
+    
+    # Check for banned words
+    # Normalize homoglyphs to ASCII
+    normalized = h.to_ascii(message.content)
+
+    if BANNED_WORDS_PATTERN.search(normalized):
+        try:
+            await message.delete()
+            warning = await message.channel.send(
+                f"🚫 {message.author.mention}, your message contained a prohibited word and was removed."
+            )
+            await asyncio.sleep(5)
+            await warning.delete()
+        except discord.Forbidden:
+            print("Missing permissions to delete a message.")
+        except Exception as e:
+            print(f"Error deleting message: {e}")
 
     await bot.process_commands(message)
 
