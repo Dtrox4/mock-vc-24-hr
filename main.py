@@ -132,7 +132,7 @@ async def on_message(message):
     
     # Check for banned words
     # Normalize homoglyphs to ASCII
-    normalized = h.to_ascii(message.content)
+    normalized = "".join(h.to_ascii(message.content))
 
     if BANNED_WORDS_PATTERN.search(normalized):
         try:
