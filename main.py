@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import os
+import json
+from pathlib import Path
 from homoglyphs import Homoglyphs
 import re
 from dotenv import load_dotenv
@@ -10,6 +12,7 @@ import asyncio
 from threading import Thread
 from punishment_config import get_mode, toggle_punishment_mode
 from jail_utils import store_user_roles, retrieve_user_roles
+from word_counter import increment_word_count, get_tracked_words, add_word, remove_word, get_word_count
 
 # Load environment variables from .env file
 load_dotenv()
@@ -129,6 +132,11 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author.bot:
         return
+
+    content = message.content.lower()
+    for word in get_tracked_words():
+        if word in content:
+            increment_word_count(word)
     
     # Check for banned words
     # Normalize homoglyphs to ASCII
@@ -277,6 +285,28 @@ async def purge(ctx, *args):
     confirm = await ctx.send(f"🧹 Deleted {len(deleted)} message(s) containing: {', '.join(keywords)}.")
     await asyncio.sleep(5)
     await confirm.delete()
+
+@bot.command()
+async def cadd(ctx, word: str):
+    if add_word(word):
+        await ctx.send(f"✅ Started tracking `{word}`.")
+    else:
+        await ctx.send(f"⚠️ `{word}` is already being tracked.")
+
+@bot.command()
+async def cremove(ctx, word: str):
+    if remove_word(word):
+        await ctx.send(f"🗑️ Stopped tracking `{word}`.")
+    else:
+        await ctx.send(f"❌ `{word}` was not being tracked.")
+
+@bot.command()
+async def count(ctx, word: str):
+    count = get_word_count(word)
+    embed = discord.Embed(title="Word Count", color=discord.Color.blurple())
+    embed.add_field(name="Word", value=word, inline=True)
+    embed.add_field(name="Count", value=f"`{count}`", inline=True)
+    await ctx.send(embed=embed)
 
 
 @bot.command()
