@@ -77,7 +77,6 @@ user_skull_list = set()
 intents=discord.Intents.all()
 intents.reactions = True
 intents.messages = True
-intents.message_content = True
 intents.voice_states = True      # Enable voice state intents
 
 # Create a bot instance with command prefix '!' and the specified intents
