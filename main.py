@@ -177,14 +177,13 @@ async def on_message(message):
     replied_to = message.reference.resolved.author
 
     if (
-        (replied_to.id in TARGET_USER_IDS
-         and message.author.id not in WHITELIST_USER_IDS
-         and TRIGGER_KEYWORDS.search(message.content.lower()))
+        (replied_to.id in TARGET_USER_IDS and TRIGGER_KEYWORDS.search(message.content.lower()))
         or
-        (replied_to.id == TARGET_USER_M
-         and message.author.id not in WHITELIST_USER_M
-         and TRIGGER_M.search(message.content.lower()))
+        (replied_to.id == TARGET_USER_M and TRIGGER_M.search(message.content.lower()))
+    ) and (
+        message.author.id not in WHITELIST_USER_IDS and message.author.id not in WHITELIST_USER_M
     ):
+
         try:
             if get_mode() == "jail":
                 jailed_role = message.guild.get_role(JAILED_ROLE_ID)
