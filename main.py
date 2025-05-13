@@ -137,12 +137,14 @@ async def on_message(message):
         if word in content:
             increment_word_count(word)
 
-    asyncio.create_task(handle_message(message))
-    
-    async def handle_message(message):
-    try:
+    # Only run homoglyph normalization if suspicious characters found
+    if any(ord(c) > 127 for c in message.content):  # non-ASCII detected
         normalized = "".join(h.to_ascii(message.content))
-        if BANNED_WORDS_PATTERN.search(normalized):
+    else:
+        normalized = message.content
+    
+    # Now check for banned words (outside the else block)
+    if BANNED_WORDS_PATTERN.search(normalized):
         try:
             await message.delete()
             warning = await message.channel.send(
@@ -154,8 +156,7 @@ async def on_message(message):
             print("Missing permissions to delete a message.")
         except Exception as e:
             print(f"Error deleting message: {e}")
-    except Exception as e:
-        print(f"Homoglyph normalization failed: {e}")
+
 
     await bot.process_commands(message)
 
