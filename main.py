@@ -159,6 +159,7 @@ async def on_message(message):
 
     if message.author.id in user_skull_list:
         try:
+            await asyncio.sleep(1)
             await message.add_reaction("☠️")
         except discord.Forbidden:
             print(f"Missing permissions to react in {message.channel.name}")
