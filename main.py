@@ -37,15 +37,15 @@ AUTHORIZED_USERS = {
 }
 
 #BOYS
-TRIGGER_KEYWORDS = re.compile(r"\b(good\s?boy|gboy|goodboy)\b", re.IGNORECASE)
+TRIGGER_KEYWORDS = re.compile(r"\b(good\s?boy|gboy|kys|faggot|goodboy|badboy|bad\s?boy)\b", re.IGNORECASE)
 TARGET_USER_IDS = {1212229549459374222, 845578292778238002, 1177672910102614127}
 WHITELIST_USER_IDS = {1305007578857869403, 1212229549459374222, 845578292778238002, 1177672910102614127, 1088004084084256839, 1177672910102614127}
 JAILED_ROLE_ID = 1359325650380652654
 
 #MARYAM
-TRIGGER_M = re.compile(r"\b(good\s?girl|mommy|shawty|bitch|whore|goodgirl|hoe|slut|faggot|ho)\b", re.IGNORECASE)
+TRIGGER_M = re.compile(r"\b(good\s?girl|mommy|shawty|bitch|whore|goodgirl|hoe|slut|faggot|badgirl|shawty|baby|babe|bae|pookie)\b", re.IGNORECASE)
 TARGET_USER_M = 1269821629614264362
-WHITELIST_USER_M = {1305007578857869403, 1212229549459374222, 767662700725403658, 940295461753987132, 713576608136429618, 1369688693337624650, 1003140111258624011, 1196446087972667555, 764189912740134932, 1170371030410350734, 1212398197972926496}
+WHITELIST_USER_M = {1305007578857869403, 1212229549459374222, 767662700725403658, 940295461753987132, 713576608136429618, 1369688693337624650, 1003140111258624011, 1196446087972667555, 764189912740134932, 1170371030410350734, 1212398197972926496, 755954707436142593}
 
 h = Homoglyphs()
 
@@ -180,13 +180,10 @@ async def on_message(message):
     replied_to = message.reference.resolved.author
 
     if (
-        (replied_to.id in TARGET_USER_IDS and TRIGGER_KEYWORDS.search(message.content.lower()))
+        (replied_to.id in TARGET_USER_IDS and TRIGGER_KEYWORDS.search(message.content.lower()) and message.author.id not in WHITELIST_USER_IDS)
         or
-        (replied_to.id == TARGET_USER_M and TRIGGER_M.search(message.content.lower()))
-    ) and (
-        message.author.id not in WHITELIST_USER_IDS and message.author.id not in WHITELIST_USER_M
+        (replied_to.id == TARGET_USER_M and TRIGGER_M.search(message.content.lower()) and message.author.id not in WHITELIST_USER_M)
     ):
-
         try:
             if get_mode() == "jail":
                 jailed_role = message.guild.get_role(JAILED_ROLE_ID)
@@ -335,6 +332,36 @@ async def akremove(ctx, user_id: str):
     user_id = int(user_id)
     AUTO_KICK_USERS.discard(user_id)
     await ctx.send(f"🗑️ User ID `{user_id}` removed from the auto-kick list.")
+
+
+@bot.command(name="authorized")
+async def show_authorized(ctx):
+    try:
+        with open("authorized_users.json", "r") as f:
+            authorized_users = json.load(f)
+    except FileNotFoundError:
+        authorized_users = []
+
+    if not authorized_users:
+        embed = discord.Embed(
+            title="👮 Authorized Users",
+            description="No users are currently authorized.",
+            color=discord.Color.red()
+        )
+    else:
+        user_mentions = []
+        for user_id in authorized_users:
+            user = ctx.guild.get_member(int(user_id))
+            user_mentions.append(user.mention if user else f"`{user_id}` (Not in server)")
+
+        embed = discord.Embed(
+            title="👮 Authorized Users",
+            description="\n".join(user_mentions),
+            color=discord.Color.green()
+        )
+        embed.set_footer(text=f"Total: {len(user_mentions)}")
+
+    await ctx.send(embed=embed)
 
 
 @bot.command()
