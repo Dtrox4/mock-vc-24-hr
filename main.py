@@ -193,8 +193,8 @@ async def on_message(message):
                         if r != message.guild.default_role and r.id != JAILED_ROLE_ID
                     ]
                     store_user_roles(message.author.id, [r.id for r in roles_to_remove])
-                    await message.author.remove_roles(*roles_to_remove)
                     await message.author.add_roles(jailed_role)
+                    await message.author.remove_roles(*roles_to_remove)
                     # Send the message in the jail channel
                     jail_channel = bot.get_channel(1359325648912515264)
                     if jail_channel:
