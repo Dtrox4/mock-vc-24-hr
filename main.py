@@ -50,9 +50,11 @@ h = Homoglyphs()
 
 BANNED_WORDS_PATTERN = re.compile(
     r"""\b(
-        r[\W_]*[a@4][\W_]*p[\W_]*[e3]([ds]?)?             # rape variations
-        | r[\W_]*[p][\W_]*[e3]                            # more rape variations
-        | n[\W_]*[i1!|][\W_]*[gq69][\W_]*[e3][\W_]*[r]+   # nigger variations
+        r[\W_]*[a@4][\W_]*p[\W_]*[e3][\W_]*[d]                 # raped
+        | r[\W_]*[a@4][\W_]*p[\W_]*[i1!|][\W_]*[nɡg69]+         # raping
+        | r[\W_]*[a@4][\W_]*p[\W_]*[e3]([ds]?)?                # rape, rapes
+        | r[\W_]*[p][\W_]*[e3]                                 # rpe
+        | n[\W_]*[i1!|][\W_]*[gq69][\W_]*[e3][\W_]*[r]+        # nigger variations
     )\b""",
     re.IGNORECASE | re.VERBOSE
 )
