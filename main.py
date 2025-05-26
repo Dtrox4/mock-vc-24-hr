@@ -288,27 +288,44 @@ async def purge(ctx, *args):
     await asyncio.sleep(5)
     await confirm.delete()
 
-@bot.command()
-async def cadd(ctx, word: str):
-    if add_word(word):
-        await ctx.send(f"✅ Started tracking `{word}`.")
-    else:
-        await ctx.send(f"⚠️ `{word}` is already being tracked.")
+# Store last deleted message per channel
+sniped_messages = {}
+
+@bot.event
+async def on_message_delete(message):
+    if message.author.bot:
+        return
+    sniped_messages[message.channel.id] = {
+        "content": message.content,
+        "author": message.author,
+        "time": message.created_at
+    }
 
 @bot.command()
-async def cremove(ctx, word: str):
-    if remove_word(word):
-        await ctx.send(f"🗑️ Stopped tracking `{word}`.")
+@commands.cooldown(1, 5, commands.BucketType.user)  # 1 use every 5 seconds per user
+async def snipe(ctx):
+    data = sniped_messages.get(ctx.channel.id)
+    if data is None:
+        await ctx.send("There's nothing to snipe.")
     else:
-        await ctx.send(f"❌ `{word}` was not being tracked.")
+        embed = discord.Embed(
+            description=data["content"],
+            color=discord.Color.orange(),
+            timestamp=data["time"]
+        )
+        embed.set_author(name=str(data['author']), icon_url=data['author'].avatar.url if data['author'].avatar else None)
+        embed.set_footer(text="Sniped message")
+        await ctx.send(embed=embed)
 
-@bot.command()
-async def count(ctx, word: str):
-    count = get_word_count(word)
-    embed = discord.Embed(title="Word Count", color=discord.Color.blurple())
-    embed.add_field(name="Word", value=word, inline=True)
-    embed.add_field(name="Count", value=f"`{count}`", inline=True)
-    await ctx.send(embed=embed)
+@snipe.error
+async def snipe_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        embed = discord.Embed(
+            title="You're too fast!",
+            description=f"Try again in `{error.retry_after:.1f}` seconds.",
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
 
 
 @bot.command()
